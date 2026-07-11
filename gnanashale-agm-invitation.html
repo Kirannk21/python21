@@ -59,14 +59,18 @@
   .org h1 {
     font-family: Verdana, 'Trebuchet MS', Arial, sans-serif;
     font-size: 29px;
-    color: var(--brand-purple);
     letter-spacing: 0.2px;
     font-weight: 700;
+    color: var(--brand-purple);
+    background: linear-gradient(90deg, #5b2d8e 45%, #a4225f);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
   .org p {
     font-family: Verdana, 'Trebuchet MS', Arial, sans-serif;
     font-size: 13px;
-    color: var(--muted);
+    color: #3d4a57;
     margin-top: 4px;
     letter-spacing: 0.3px;
   }
@@ -209,34 +213,35 @@
     <div class="band"></div>
     <div class="inner">
       <header>
-        <svg class="emblem" width="104" height="104" viewBox="0 0 104 104" aria-hidden="true">
-          <defs>
-            <linearGradient id="ray" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stop-color="#f6a21e"/>
-              <stop offset="1" stop-color="#e05a24"/>
-            </linearGradient>
-          </defs>
-          <g transform="translate(52,52)">
-            <g fill="url(#ray)">
-              <path d="M-2.6-14 L-4.5-40 L4.5-40 L2.6-14 Z" transform="rotate(-84)"/>
-              <path d="M-2.6-14 L-4.5-40 L4.5-40 L2.6-14 Z" transform="rotate(-63)"/>
-              <path d="M-2.6-14 L-4.5-40 L4.5-40 L2.6-14 Z" transform="rotate(-42)"/>
-              <path d="M-2.6-14 L-4.5-40 L4.5-40 L2.6-14 Z" transform="rotate(-21)"/>
-              <path d="M-2.6-14 L-4.5-40 L4.5-40 L2.6-14 Z" transform="rotate(0)"/>
-              <path d="M-2.6-14 L-4.5-40 L4.5-40 L2.6-14 Z" transform="rotate(21)"/>
-              <path d="M-2.6-14 L-4.5-40 L4.5-40 L2.6-14 Z" transform="rotate(42)"/>
-              <path d="M-2.6-14 L-4.5-40 L4.5-40 L2.6-14 Z" transform="rotate(63)"/>
-              <path d="M-2.6-14 L-4.5-40 L4.5-40 L2.6-14 Z" transform="rotate(84)"/>
-            </g>
-            <circle r="12" fill="#cf2e21"/>
+        <svg class="emblem" width="150" height="84" viewBox="0 0 150 84" aria-hidden="true">
+          <!-- orange rays fanning around the G -->
+          <g transform="translate(75,20)" fill="#f7941d">
+            <path d="M-1.4-9 L-2.4-22 L2.4-22 L1.4-9 Z" transform="rotate(-80)"/>
+            <path d="M-1.4-9 L-2.4-22 L2.4-22 L1.4-9 Z" transform="rotate(-60)"/>
+            <path d="M-1.4-9 L-2.4-22 L2.4-22 L1.4-9 Z" transform="rotate(-40)"/>
+            <path d="M-1.4-9 L-2.4-22 L2.4-22 L1.4-9 Z" transform="rotate(-20)"/>
+            <path d="M-1.4-9 L-2.4-22 L2.4-22 L1.4-9 Z" transform="rotate(0)"/>
+            <path d="M-1.4-9 L-2.4-22 L2.4-22 L1.4-9 Z" transform="rotate(20)"/>
+            <path d="M-1.4-9 L-2.4-22 L2.4-22 L1.4-9 Z" transform="rotate(40)"/>
+            <path d="M-1.4-9 L-2.4-22 L2.4-22 L1.4-9 Z" transform="rotate(60)"/>
+            <path d="M-1.4-9 L-2.4-22 L2.4-22 L1.4-9 Z" transform="rotate(80)"/>
           </g>
-          <rect x="2" y="58" width="100" height="24" rx="7" fill="#cf2e21"/>
-          <text x="52" y="75.5" text-anchor="middle"
-                font-family="'Noto Sans Kannada', sans-serif" font-weight="700"
-                font-size="15" fill="#ffffff">ಜ್ಞಾನಶಾಲೆ</text>
-          <text x="52" y="93" text-anchor="middle"
+          <!-- red G at the centre of the rays -->
+          <text x="75" y="27" text-anchor="middle"
+                font-family="Georgia, 'Times New Roman', serif" font-weight="700"
+                font-style="italic" font-size="19" fill="#e02a26">G</text>
+          <!-- Kannada wordmark: red 3D shadow behind, blue in front, slanted -->
+          <g transform="skewX(-8)">
+            <text x="84.8" y="59.4" text-anchor="middle"
+                  font-family="'Noto Sans Kannada', sans-serif" font-weight="700"
+                  font-size="27" fill="#e02a26">ಜ್ಞಾನಶಾಲೆ</text>
+            <text x="86" y="58" text-anchor="middle"
+                  font-family="'Noto Sans Kannada', sans-serif" font-weight="700"
+                  font-size="27" fill="#2b3a8f">ಜ್ಞಾನಶಾಲೆ</text>
+          </g>
+          <text x="138" y="76" text-anchor="end"
                 font-family="Arial, Helvetica, sans-serif" font-weight="700"
-                font-size="8.5" fill="#cf2e21" letter-spacing="2">GNANASHALE</text>
+                font-size="8" fill="#e02a26" letter-spacing="1.5">GNANASHALE</text>
         </svg>
         <div class="org">
           <h1>Gnanashale</h1>
