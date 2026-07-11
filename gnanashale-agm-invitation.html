@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gnanashale AGM Invitation</title>
+<style>
+  :root {
+    --brand-red: #d63a2f;
+    --brand-orange: #f28c28;
+    --brand-purple: #5b2d8e;
+    --ink: #2b2b2b;
+    --muted: #6b6b6b;
+    --paper: #fffdf8;
+    --cream: #fdf3e3;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: Georgia, 'Times New Roman', serif;
+    background: #ece7de;
+    color: var(--ink);
+    display: flex;
+    justify-content: center;
+    padding: 40px 16px;
+  }
+  .card {
+    width: 100%;
+    max-width: 720px;
+    background: var(--paper);
+    border: 1px solid #e0d8c8;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.12);
+    overflow: hidden;
+  }
+  .band {
+    height: 8px;
+    background: linear-gradient(90deg, var(--brand-red), var(--brand-orange), var(--brand-purple));
+  }
+  .inner {
+    padding: 48px 56px 40px;
+    border: 1px solid #eadfc9;
+    margin: 14px;
+  }
+  header {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    justify-content: center;
+    text-align: left;
+    padding-bottom: 22px;
+    border-bottom: 2px solid var(--cream);
+  }
+  .emblem { flex: 0 0 auto; }
+  .org h1 {
+    font-size: 30px;
+    color: var(--brand-purple);
+    letter-spacing: 0.5px;
+    font-weight: 700;
+  }
+  .org p {
+    font-size: 14px;
+    color: var(--muted);
+    margin-top: 2px;
+    letter-spacing: 0.4px;
+  }
+  .eyebrow {
+    text-align: center;
+    margin-top: 30px;
+    font-size: 13px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--brand-red);
+  }
+  h2.title {
+    text-align: center;
+    font-size: 34px;
+    color: var(--ink);
+    margin-top: 10px;
+    font-weight: 600;
+  }
+  h2.title span { color: var(--brand-purple); }
+  .invite-line {
+    text-align: center;
+    max-width: 520px;
+    margin: 18px auto 0;
+    font-size: 16.5px;
+    line-height: 1.7;
+    color: #444;
+    font-style: italic;
+  }
+  .details {
+    display: flex;
+    justify-content: center;
+    gap: 0;
+    margin: 32px auto 0;
+    max-width: 560px;
+    background: var(--cream);
+    border-radius: 10px;
+    padding: 22px 10px;
+  }
+  .detail {
+    flex: 1;
+    text-align: center;
+    padding: 0 18px;
+  }
+  .detail + .detail { border-left: 1px solid #ecd9b8; }
+  .detail .label {
+    font-size: 11px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--brand-red);
+    margin-bottom: 6px;
+    font-family: Arial, Helvetica, sans-serif;
+  }
+  .detail .value {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.45;
+  }
+  .agenda {
+    margin: 36px auto 0;
+    max-width: 560px;
+  }
+  .agenda h3 {
+    text-align: center;
+    font-size: 14px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--brand-purple);
+    margin-bottom: 14px;
+  }
+  .agenda ol {
+    list-style: none;
+    counter-reset: item;
+  }
+  .agenda li {
+    counter-increment: item;
+    display: flex;
+    gap: 14px;
+    align-items: baseline;
+    padding: 9px 0;
+    border-bottom: 1px dashed #e6dcc6;
+    font-size: 15.5px;
+    line-height: 1.5;
+  }
+  .agenda li::before {
+    content: counter(item, decimal-leading-zero);
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--brand-orange);
+    flex: 0 0 auto;
+  }
+  .note {
+    margin: 30px auto 0;
+    max-width: 560px;
+    font-size: 13.5px;
+    color: var(--muted);
+    line-height: 1.65;
+    text-align: center;
+  }
+  footer {
+    margin-top: 34px;
+    padding-top: 22px;
+    border-top: 2px solid var(--cream);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 20px;
+  }
+  footer .rsvp {
+    font-size: 13.5px;
+    color: var(--ink);
+    line-height: 1.6;
+  }
+  footer .rsvp strong { color: var(--brand-purple); }
+  footer .sign {
+    text-align: right;
+    font-size: 13.5px;
+    line-height: 1.6;
+  }
+  footer .sign .who {
+    font-weight: 700;
+    color: var(--ink);
+  }
+  @media print {
+    body { background: #fff; padding: 0; }
+    .card { box-shadow: none; border: none; max-width: none; }
+  }
+  @media (max-width: 560px) {
+    .inner { padding: 30px 22px; }
+    .details { flex-direction: column; gap: 16px; }
+    .detail + .detail { border-left: none; border-top: 1px solid #ecd9b8; padding-top: 16px; }
+    footer { flex-direction: column; align-items: center; text-align: center; }
+    footer .sign { text-align: center; }
+  }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="band"></div>
+    <div class="inner">
+      <header>
+        <svg class="emblem" width="72" height="72" viewBox="0 0 72 72" aria-hidden="true">
+          <g transform="translate(36,30)">
+            <g fill="#f28c28">
+              <path d="M0-26 L3-10 L-3-10 Z" transform="rotate(0)"/>
+              <path d="M0-26 L3-10 L-3-10 Z" transform="rotate(30)"/>
+              <path d="M0-26 L3-10 L-3-10 Z" transform="rotate(60)"/>
+              <path d="M0-26 L3-10 L-3-10 Z" transform="rotate(90)"/>
+              <path d="M0-26 L3-10 L-3-10 Z" transform="rotate(-30)"/>
+              <path d="M0-26 L3-10 L-3-10 Z" transform="rotate(-60)"/>
+              <path d="M0-26 L3-10 L-3-10 Z" transform="rotate(-90)"/>
+            </g>
+            <circle r="9" fill="#d63a2f"/>
+          </g>
+          <rect x="10" y="56" width="52" height="10" rx="3" fill="#d63a2f"/>
+          <text x="36" y="64" text-anchor="middle" font-family="Arial, sans-serif" font-size="7" fill="#fff" letter-spacing="1">GNANASHALE</text>
+        </svg>
+        <div class="org">
+          <h1>Gnanashale</h1>
+          <p>Multi State Co-operative Society Ltd</p>
+        </div>
+      </header>
+
+      <p class="eyebrow">You are cordially invited</p>
+      <h2 class="title">Annual General <span>Meeting</span></h2>
+
+      <p class="invite-line">
+        The Board of Directors warmly invites all esteemed members of
+        Gnanashale Multi State Co-operative Society Ltd to attend the
+        Annual General Meeting for the financial year 2025&ndash;26.
+      </p>
+
+      <div class="details">
+        <div class="detail">
+          <div class="label">Date</div>
+          <div class="value">Saturday,<br>12 September 2026</div>
+        </div>
+        <div class="detail">
+          <div class="label">Time</div>
+          <div class="value">10:30 AM<br>onwards</div>
+        </div>
+        <div class="detail">
+          <div class="label">Venue</div>
+          <div class="value">Society Head Office,<br>Bengaluru</div>
+        </div>
+      </div>
+
+      <div class="agenda">
+        <h3>Agenda</h3>
+        <ol>
+          <li>Welcome address and confirmation of the minutes of the previous AGM</li>
+          <li>Presentation and adoption of the Annual Report for FY 2025&ndash;26</li>
+          <li>Consideration and approval of the audited financial statements</li>
+          <li>Declaration of dividend and appropriation of profits</li>
+          <li>Appointment of statutory auditors for the ensuing year</li>
+          <li>Election of members to the Board of Directors</li>
+          <li>Any other business, with the permission of the Chair</li>
+        </ol>
+      </div>
+
+      <p class="note">
+        Members are requested to carry their membership ID for registration.
+        High tea will be served after the meeting. Kindly be seated by 10:15 AM.
+      </p>
+
+      <footer>
+        <div class="rsvp">
+          <strong>RSVP:</strong> office@gnanashale.org<br>
+          Phone: +91 &ndash; XXXXX XXXXX
+        </div>
+        <div class="sign">
+          By order of the Board,<br>
+          <span class="who">Secretary</span><br>
+          Gnanashale Multi State Co-operative Society Ltd
+        </div>
+      </footer>
+    </div>
+    <div class="band"></div>
+  </div>
+</body>
+</html>
