@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Secure KYC Document Upload</title>
+<style>
+  :root {
+    --brand: #0b5394;        /* primary brand colour */
+    --brand-dark: #073763;
+    --brand-light: #e8f0fa;
+    --accent: #1a9e5c;
+    --danger: #c0392b;
+    --text: #1f2a37;
+    --muted: #6b7280;
+    --bg: #f4f6f9;
+    --card: #ffffff;
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", "Noto Sans Kannada", "Noto Sans Devanagari", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 16px;
+    line-height: 1.5;
+  }
+  .app { max-width: 480px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; background: var(--bg); }
+
+  /* Header */
+  header {
+    background: var(--brand);
+    color: #fff;
+    padding: 14px 16px;
+    display: flex; align-items: center; gap: 12px;
+    position: sticky; top: 0; z-index: 10;
+  }
+  .logo {
+    width: 40px; height: 40px; border-radius: 10px;
+    background: #fff; color: var(--brand);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 18px; flex-shrink: 0;
+  }
+  .header-title { font-size: 16px; font-weight: 700; line-height: 1.2; }
+  .header-sub { font-size: 12px; opacity: .85; }
+  .lang-select {
+    margin-left: auto;
+    background: rgba(255,255,255,.15);
+    border: 1px solid rgba(255,255,255,.4);
+    color: #fff; border-radius: 8px;
+    padding: 6px 8px; font-size: 13px;
+  }
+  .lang-select option { color: var(--text); }
+
+  /* Progress */
+  .progress-wrap { padding: 16px 16px 4px; }
+  .progress-steps { display: flex; justify-content: space-between; margin-bottom: 6px; }
+  .pstep { flex: 1; text-align: center; font-size: 11px; color: var(--muted); font-weight: 600; }
+  .pstep.active { color: var(--brand); }
+  .pstep.done { color: var(--accent); }
+  .progress-bar { height: 6px; background: #dde3ec; border-radius: 3px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--brand); border-radius: 3px; transition: width .35s ease; }
+
+  main { flex: 1; padding: 16px; padding-bottom: 32px; }
+  .card {
+    background: var(--card); border-radius: var(--radius);
+    padding: 20px 16px; box-shadow: 0 1px 4px rgba(16,24,40,.08);
+    margin-bottom: 16px;
+  }
+  h1 { font-size: 20px; margin-bottom: 6px; color: var(--brand-dark); }
+  h2 { font-size: 17px; margin-bottom: 10px; color: var(--brand-dark); }
+  p.help { color: var(--muted); font-size: 14px; margin-bottom: 14px; }
+
+  label { display: block; font-size: 14px; font-weight: 600; margin: 14px 0 6px; }
+  label .req { color: var(--danger); }
+  label .opt { color: var(--muted); font-weight: 400; font-size: 12px; }
+  input[type=text], input[type=tel], input[type=email], select, textarea {
+    width: 100%; padding: 14px 12px; font-size: 16px;
+    border: 1.5px solid #cbd5e1; border-radius: 10px; background: #fff;
+    color: var(--text);
+  }
+  input:focus, select:focus, textarea:focus { outline: 2px solid var(--brand); border-color: var(--brand); }
+  .field-error { color: var(--danger); font-size: 13px; margin-top: 4px; display: none; }
+  .invalid { border-color: var(--danger) !important; }
+
+  /* Buttons */
+  .btn {
+    display: block; width: 100%; padding: 16px;
+    font-size: 17px; font-weight: 700; border: none; border-radius: 12px;
+    cursor: pointer; text-align: center; margin-top: 18px;
+  }
+  .btn-primary { background: var(--brand); color: #fff; }
+  .btn-primary:active { background: var(--brand-dark); }
+  .btn-primary:disabled { background: #9db6d4; cursor: not-allowed; }
+  .btn-secondary { background: #fff; color: var(--brand); border: 2px solid var(--brand); margin-top: 10px; }
+  .btn-row { display: flex; gap: 10px; }
+  .btn-row .btn { margin-top: 18px; }
+
+  /* Upload zones */
+  .upload-zone {
+    border: 2px dashed #94a3b8; border-radius: 12px;
+    background: var(--brand-light);
+    padding: 26px 14px; text-align: center; cursor: pointer;
+    margin-top: 8px;
+  }
+  .upload-zone:active { background: #d9e6f7; }
+  .upload-zone .up-icon { font-size: 34px; display: block; margin-bottom: 6px; }
+  .upload-zone .up-label { font-weight: 700; font-size: 16px; color: var(--brand-dark); }
+  .upload-zone .up-hint { font-size: 12.5px; color: var(--muted); margin-top: 4px; }
+  .upload-zone.has-file { border-style: solid; border-color: var(--accent); background: #eafaf1; }
+  .file-preview { margin-top: 10px; display: flex; align-items: center; gap: 10px; background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 8px; }
+  .file-preview img { width: 56px; height: 56px; object-fit: cover; border-radius: 8px; }
+  .file-preview .pdf-badge { width: 56px; height: 56px; border-radius: 8px; background: #fdecea; color: var(--danger); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; }
+  .file-preview .f-meta { flex: 1; min-width: 0; }
+  .file-preview .f-name { font-size: 13px; font-weight: 600; word-break: break-all; }
+  .file-preview .f-size { font-size: 12px; color: var(--muted); }
+  .file-remove { background: none; border: none; color: var(--danger); font-size: 22px; cursor: pointer; padding: 6px; }
+
+  .notice {
+    background: #fff8e6; border: 1px solid #f0d48a; border-radius: 10px;
+    padding: 12px; font-size: 13.5px; margin-top: 14px; color: #7a5c00;
+  }
+  .privacy-box {
+    background: var(--brand-light); border-radius: 10px; padding: 14px;
+    font-size: 13.5px; color: var(--text); margin-top: 12px;
+  }
+  .privacy-box ul { margin: 8px 0 0 18px; }
+  .privacy-box li { margin-bottom: 4px; }
+
+  /* Review */
+  .review-row { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid #eef2f6; font-size: 14.5px; }
+  .review-row:last-child { border-bottom: none; }
+  .review-row .rk { color: var(--muted); flex-shrink: 0; }
+  .review-row .rv { font-weight: 600; text-align: right; word-break: break-word; }
+  .review-thumbs { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+  .review-thumbs .thumb { text-align: center; font-size: 12px; color: var(--muted); }
+  .review-thumbs img { width: 90px; height: 90px; object-fit: cover; border-radius: 10px; border: 1px solid #e2e8f0; display: block; margin-bottom: 4px; }
+  .review-thumbs .pdf-thumb { width: 90px; height: 90px; border-radius: 10px; background: #fdecea; color: var(--danger); display: flex; align-items: center; justify-content: center; font-weight: 800; margin-bottom: 4px; }
+
+  .consent-row { display: flex; gap: 10px; align-items: flex-start; margin-top: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; }
+  .consent-row input[type=checkbox] { width: 22px; height: 22px; margin-top: 2px; flex-shrink: 0; accent-color: var(--brand); }
+  .consent-row span { font-size: 13.5px; }
+
+  /* Success */
+  .success-icon { width: 76px; height: 76px; border-radius: 50%; background: #eafaf1; color: var(--accent); font-size: 40px; display: flex; align-items: center; justify-content: center; margin: 6px auto 14px; }
+  .ref-box { background: var(--brand-light); border: 1.5px dashed var(--brand); border-radius: 12px; padding: 14px; text-align: center; margin: 14px 0; }
+  .ref-box .ref-label { font-size: 13px; color: var(--muted); }
+  .ref-box .ref-num { font-size: 22px; font-weight: 800; letter-spacing: 1px; color: var(--brand-dark); }
+  .received-banner { background: #eef7ff; border-left: 4px solid var(--brand); padding: 12px; border-radius: 8px; font-size: 14.5px; font-weight: 600; color: var(--brand-dark); text-align: left; }
+
+  footer { text-align: center; font-size: 12px; color: var(--muted); padding: 14px 16px 24px; }
+  footer a { color: var(--brand); }
+  .step { display: none; }
+  .step.visible { display: block; animation: fadein .25s ease; }
+  @keyframes fadein { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  .demo-tag { position: fixed; bottom: 8px; right: 8px; background: #111827; color: #fff; font-size: 10px; padding: 3px 8px; border-radius: 6px; opacity: .65; z-index: 50; }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="logo">SB</div>
+    <div>
+      <div class="header-title" data-i18n="appTitle">Secure KYC Upload</div>
+      <div class="header-sub">Sampada Business Services (Demo)</div>
+    </div>
+    <select class="lang-select" id="langSelect" aria-label="Language">
+      <option value="en">English</option>
+      <option value="kn">ಕನ್ನಡ</option>
+      <option value="hi">हिंदी</option>
+    </select>
+  </header>
+
+  <div class="progress-wrap">
+    <div class="progress-steps">
+      <div class="pstep" data-step="1" data-i18n="stepDetails">Details</div>
+      <div class="pstep" data-step="2" data-i18n="stepDocs">Documents</div>
+      <div class="pstep" data-step="3" data-i18n="stepReview">Confirm</div>
+      <div class="pstep" data-step="4" data-i18n="stepDone">Done</div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:12%"></div></div>
+  </div>
+
+  <main>
+    <!-- STEP 0: Welcome + privacy notice -->
+    <section class="step visible" id="step0">
+      <div class="card">
+        <h1 data-i18n="welcomeTitle">Upload your KYC documents</h1>
+        <p class="help" data-i18n="welcomeHelp">This secure page only collects your documents. Nothing is verified or approved automatically — our team reviews everything separately. It takes about 2 minutes.</p>
+        <div class="privacy-box">
+          <strong data-i18n="privacyTitle">Privacy notice</strong>
+          <ul>
+            <li data-i18n="privacy1">Your documents are used only to complete your KYC (Know Your Customer) requirement.</li>
+            <li data-i18n="privacy2">They are encrypted during upload and in storage, and are visible only to authorised staff.</li>
+            <li data-i18n="privacy3">They are never shared through public links and are never used for AI training.</li>
+            <li data-i18n="privacy4">They are kept only as long as required by our retention policy and applicable Indian law (DPDP Act, 2023), then deleted.</li>
+          </ul>
+        </div>
+        <button class="btn btn-primary" onclick="goTo(1)" data-i18n="startBtn">Start</button>
+      </div>
+    </section>
+
+    <!-- STEP 1: Customer details -->
+    <section class="step" id="step1">
+      <div class="card">
+        <h2 data-i18n="detailsTitle">Your details</h2>
+        <p class="help" data-i18n="detailsHelp">Please fill in your basic details so we can match your documents to your application.</p>
+
+        <label data-i18n="lblName">Full name <span class="req">*</span></label>
+        <input type="text" id="fullName" autocomplete="name" placeholder="e.g. Ramesh Kumar">
+        <div class="field-error" id="err-fullName" data-i18n="errName">Please enter your full name.</div>
+
+        <label data-i18n="lblMobile">Mobile number <span class="req">*</span></label>
+        <input type="tel" id="mobile" inputmode="numeric" maxlength="10" autocomplete="tel" placeholder="10-digit mobile number">
+        <div class="field-error" id="err-mobile" data-i18n="errMobile">Please enter a valid 10-digit mobile number.</div>
+
+        <label data-i18n="lblEmail">Email address <span class="opt" data-i18n="optional">(optional)</span></label>
+        <input type="email" id="email" autocomplete="email" placeholder="name@example.com">
+        <div class="field-error" id="err-email" data-i18n="errEmail">Please enter a valid email address.</div>
+
+        <label data-i18n="lblCustId">Customer / Application ID <span class="req">*</span></label>
+        <input type="text" id="custId" placeholder="e.g. APP-2026-1042">
+        <div class="field-error" id="err-custId" data-i18n="errCustId">Please enter your customer or application ID. It is in your WhatsApp message.</div>
+
+        <button class="btn btn-primary" onclick="validateDetails()" data-i18n="continueBtn">Continue</button>
+      </div>
+    </section>
+
+    <!-- STEP 2: Document type + upload -->
+    <section class="step" id="step2">
+      <div class="card">
+        <h2 data-i18n="docTitle">Upload your document</h2>
+        <p class="help" data-i18n="docHelp">Choose the document type, then upload a clear photo or PDF. Make sure all corners are visible and the text is readable.</p>
+
+        <label data-i18n="lblDocType">Document type <span class="req">*</span></label>
+        <select id="docType" onchange="onDocTypeChange()">
+          <option value="" data-i18n="docSelect">-- Select document --</option>
+          <option value="aadhaar">Aadhaar Card</option>
+          <option value="pan">PAN Card</option>
+          <option value="passport">Passport</option>
+          <option value="dl">Driving Licence</option>
+          <option value="voter">Voter ID</option>
+          <option value="address">Address Proof</option>
+          <option value="business">Business Registration Document</option>
+          <option value="other">Other</option>
+        </select>
+        <div class="field-error" id="err-docType" data-i18n="errDocType">Please select a document type.</div>
+
+        <div id="otherWrap" style="display:none">
+          <label data-i18n="lblOther">Document name <span class="req">*</span></label>
+          <input type="text" id="otherName" placeholder="e.g. Rent agreement">
+        </div>
+
+        <div id="uploadArea" style="display:none">
+          <label data-i18n="lblFront">Front side <span class="req">*</span></label>
+          <div class="upload-zone" id="zone-front" onclick="pick('front')">
+            <span class="up-icon">📄</span>
+            <span class="up-label" data-i18n="tapUpload">Tap to upload photo or PDF</span>
+            <div class="up-hint" data-i18n="upHint">JPG, PNG or PDF · up to 5 MB</div>
+          </div>
+          <div id="preview-front"></div>
+          <input type="file" id="file-front" accept="image/jpeg,image/png,application/pdf" hidden>
+
+          <div id="backWrap" style="display:none">
+            <label><span data-i18n="lblBack">Back side</span> <span class="req" id="backReq">*</span><span class="opt" id="backOpt" style="display:none" data-i18n="optional">(optional)</span></label>
+            <div class="upload-zone" id="zone-back" onclick="pick('back')">
+              <span class="up-icon">📄</span>
+              <span class="up-label" data-i18n="tapUpload">Tap to upload photo or PDF</span>
+              <div class="up-hint" data-i18n="upHint">JPG, PNG or PDF · up to 5 MB</div>
+            </div>
+            <div id="preview-back"></div>
+            <input type="file" id="file-back" accept="image/jpeg,image/png,application/pdf" hidden>
+          </div>
+
+          <div class="notice" data-i18n="clearNotice">📷 Tip: place the document on a flat surface in good light. Avoid glare and blur.</div>
+        </div>
+        <div class="field-error" id="err-files" data-i18n="errFiles">Please upload the required document image(s).</div>
+
+        <div class="btn-row">
+          <button class="btn btn-secondary" onclick="goTo(1)" data-i18n="backBtn">Back</button>
+          <button class="btn btn-primary" onclick="validateDocs()" data-i18n="continueBtn">Continue</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 3: Review + consent -->
+    <section class="step" id="step3">
+      <div class="card">
+        <h2 data-i18n="reviewTitle">Check and confirm</h2>
+        <p class="help" data-i18n="reviewHelp">Please check your details and files before submitting.</p>
+        <div id="reviewDetails"></div>
+        <div class="review-thumbs" id="reviewThumbs"></div>
+
+        <div class="consent-row">
+          <input type="checkbox" id="consent">
+          <span data-i18n="consentText">I confirm the documents belong to me (or my business) and I consent to Sampada Business Services collecting and storing them securely for KYC purposes only, as described in the privacy notice. I understand my documents will be reviewed separately by the internal team.</span>
+        </div>
+        <div class="field-error" id="err-consent" data-i18n="errConsent">Please tick the consent box to continue.</div>
+
+        <div class="btn-row">
+          <button class="btn btn-secondary" onclick="goTo(2)" data-i18n="backBtn">Back</button>
+          <button class="btn btn-primary" id="submitBtn" onclick="submitAll()" data-i18n="submitBtn">Submit documents</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 4: Success -->
+    <section class="step" id="step4">
+      <div class="card" style="text-align:center">
+        <div class="success-icon">✓</div>
+        <h2 data-i18n="successTitle">Submission successful</h2>
+        <div class="ref-box">
+          <div class="ref-label" data-i18n="refLabel">Your reference number</div>
+          <div class="ref-num" id="refNum">—</div>
+        </div>
+        <div class="received-banner" data-i18n="receivedBanner">Your documents have been received and are subject to review.</div>
+        <p class="help" style="margin-top:12px" data-i18n="successHelp">Please save this reference number. A confirmation has been sent to your WhatsApp number (where available). Our team will contact you if anything more is needed.</p>
+        <button class="btn btn-secondary" onclick="resetFlow()" data-i18n="uploadMore">Upload another document</button>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span data-i18n="footNote">This page collects documents only. It does not verify or approve them.</span><br>
+    <span data-i18n="footPrivacy">Privacy notice shown at start · Contact: support@example.in</span>
+  </footer>
+</div>
+<div class="demo-tag">PROTOTYPE · SAMPLE DATA ONLY</div>
+
+<script>
+/* ---------------- i18n ---------------- */
+const I18N = {
+  en: {}, // English strings live in the markup itself
+  kn: {
+    appTitle:"ಸುರಕ್ಷಿತ KYC ಅಪ್‌ಲೋಡ್", stepDetails:"ವಿವರಗಳು", stepDocs:"ದಾಖಲೆಗಳು", stepReview:"ದೃಢೀಕರಣ", stepDone:"ಮುಗಿದಿದೆ",
+    welcomeTitle:"ನಿಮ್ಮ KYC ದಾಖಲೆಗಳನ್ನು ಅಪ್‌ಲೋಡ್ ಮಾಡಿ",
+    welcomeHelp:"ಈ ಸುರಕ್ಷಿತ ಪುಟವು ನಿಮ್ಮ ದಾಖಲೆಗಳನ್ನು ಸಂಗ್ರಹಿಸುತ್ತದೆ ಮಾತ್ರ. ಯಾವುದೂ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಪರಿಶೀಲನೆ ಆಗುವುದಿಲ್ಲ — ನಮ್ಮ ತಂಡ ಪ್ರತ್ಯೇಕವಾಗಿ ಪರಿಶೀಲಿಸುತ್ತದೆ. ಸುಮಾರು 2 ನಿಮಿಷ ಬೇಕಾಗುತ್ತದೆ.",
+    privacyTitle:"ಗೌಪ್ಯತೆ ಸೂಚನೆ",
+    privacy1:"ನಿಮ್ಮ ದಾಖಲೆಗಳನ್ನು KYC ಅಗತ್ಯ ಪೂರೈಸಲು ಮಾತ್ರ ಬಳಸಲಾಗುತ್ತದೆ.",
+    privacy2:"ಅಪ್‌ಲೋಡ್ ಮತ್ತು ಸಂಗ್ರಹಣೆ ಸಮಯದಲ್ಲಿ ಎನ್‌ಕ್ರಿಪ್ಟ್ ಆಗಿರುತ್ತವೆ; ಅಧಿಕೃತ ಸಿಬ್ಬಂದಿಗೆ ಮಾತ್ರ ಲಭ್ಯ.",
+    privacy3:"ಸಾರ್ವಜನಿಕ ಲಿಂಕ್‌ಗಳ ಮೂಲಕ ಹಂಚಿಕೊಳ್ಳುವುದಿಲ್ಲ; AI ತರಬೇತಿಗೆ ಬಳಸುವುದಿಲ್ಲ.",
+    privacy4:"ನಮ್ಮ ಧಾರಣಾ ನೀತಿ ಮತ್ತು ಭಾರತೀಯ ಕಾನೂನಿನ (DPDP ಕಾಯ್ದೆ, 2023) ಪ್ರಕಾರ ಮಾತ್ರ ಇಟ್ಟುಕೊಂಡು ನಂತರ ಅಳಿಸಲಾಗುತ್ತದೆ.",
+    startBtn:"ಪ್ರಾರಂಭಿಸಿ",
+    detailsTitle:"ನಿಮ್ಮ ವಿವರಗಳು",
+    detailsHelp:"ನಿಮ್ಮ ದಾಖಲೆಗಳನ್ನು ನಿಮ್ಮ ಅರ್ಜಿಗೆ ಹೊಂದಿಸಲು ದಯವಿಟ್ಟು ಮೂಲ ವಿವರಗಳನ್ನು ಭರ್ತಿ ಮಾಡಿ.",
+    lblName:'ಪೂರ್ಣ ಹೆಸರು <span class="req">*</span>', lblMobile:'ಮೊಬೈಲ್ ಸಂಖ್ಯೆ <span class="req">*</span>',
+    lblEmail:'ಇಮೇಲ್ ವಿಳಾಸ <span class="opt">(ಐಚ್ಛಿಕ)</span>', lblCustId:'ಗ್ರಾಹಕ / ಅರ್ಜಿ ID <span class="req">*</span>',
+    optional:"(ಐಚ್ಛಿಕ)",
+    errName:"ದಯವಿಟ್ಟು ನಿಮ್ಮ ಪೂರ್ಣ ಹೆಸರನ್ನು ನಮೂದಿಸಿ.", errMobile:"ದಯವಿಟ್ಟು ಸರಿಯಾದ 10-ಅಂಕಿಯ ಮೊಬೈಲ್ ಸಂಖ್ಯೆ ನಮೂದಿಸಿ.",
+    errEmail:"ದಯವಿಟ್ಟು ಸರಿಯಾದ ಇಮೇಲ್ ನಮೂದಿಸಿ.", errCustId:"ದಯವಿಟ್ಟು ನಿಮ್ಮ ಗ್ರಾಹಕ ಅಥವಾ ಅರ್ಜಿ ID ನಮೂದಿಸಿ.",
+    continueBtn:"ಮುಂದುವರಿಸಿ", backBtn:"ಹಿಂದೆ",
+    docTitle:"ದಾಖಲೆ ಅಪ್‌ಲೋಡ್ ಮಾಡಿ",
+    docHelp:"ದಾಖಲೆ ಪ್ರಕಾರ ಆಯ್ಕೆಮಾಡಿ, ನಂತರ ಸ್ಪಷ್ಟ ಫೋಟೋ ಅಥವಾ PDF ಅಪ್‌ಲೋಡ್ ಮಾಡಿ.",
+    lblDocType:'ದಾಖಲೆ ಪ್ರಕಾರ <span class="req">*</span>', docSelect:"-- ದಾಖಲೆ ಆಯ್ಕೆಮಾಡಿ --",
+    errDocType:"ದಯವಿಟ್ಟು ದಾಖಲೆ ಪ್ರಕಾರ ಆಯ್ಕೆಮಾಡಿ.", lblOther:'ದಾಖಲೆ ಹೆಸರು <span class="req">*</span>',
+    lblFront:'ಮುಂಭಾಗ <span class="req">*</span>', lblBack:"ಹಿಂಭಾಗ",
+    tapUpload:"ಫೋಟೋ ಅಥವಾ PDF ಅಪ್‌ಲೋಡ್ ಮಾಡಲು ಒತ್ತಿ", upHint:"JPG, PNG ಅಥವಾ PDF · ಗರಿಷ್ಠ 5 MB",
+    clearNotice:"📷 ಸಲಹೆ: ಉತ್ತಮ ಬೆಳಕಿನಲ್ಲಿ ಸಮತಟ್ಟಾದ ಜಾಗದಲ್ಲಿ ದಾಖಲೆ ಇಟ್ಟು ಫೋಟೋ ತೆಗೆಯಿರಿ.",
+    errFiles:"ದಯವಿಟ್ಟು ಅಗತ್ಯ ದಾಖಲೆ ಚಿತ್ರಗಳನ್ನು ಅಪ್‌ಲೋಡ್ ಮಾಡಿ.",
+    reviewTitle:"ಪರಿಶೀಲಿಸಿ ಮತ್ತು ದೃಢೀಕರಿಸಿ", reviewHelp:"ಸಲ್ಲಿಸುವ ಮೊದಲು ವಿವರ ಮತ್ತು ಫೈಲ್‌ಗಳನ್ನು ಪರಿಶೀಲಿಸಿ.",
+    consentText:"ಈ ದಾಖಲೆಗಳು ನನ್ನವು (ಅಥವಾ ನನ್ನ ವ್ಯವಹಾರದವು) ಎಂದು ದೃಢಪಡಿಸುತ್ತೇನೆ ಮತ್ತು KYC ಉದ್ದೇಶಕ್ಕಾಗಿ ಮಾತ್ರ ಸುರಕ್ಷಿತವಾಗಿ ಸಂಗ್ರಹಿಸಲು ಸಮ್ಮತಿಸುತ್ತೇನೆ. ನನ್ನ ದಾಖಲೆಗಳನ್ನು ಆಂತರಿಕ ತಂಡ ಪ್ರತ್ಯೇಕವಾಗಿ ಪರಿಶೀಲಿಸುತ್ತದೆ ಎಂದು ಅರ್ಥಮಾಡಿಕೊಂಡಿದ್ದೇನೆ.",
+    errConsent:"ಮುಂದುವರಿಯಲು ದಯವಿಟ್ಟು ಸಮ್ಮತಿ ಬಾಕ್ಸ್ ಟಿಕ್ ಮಾಡಿ.",
+    submitBtn:"ದಾಖಲೆಗಳನ್ನು ಸಲ್ಲಿಸಿ",
+    successTitle:"ಸಲ್ಲಿಕೆ ಯಶಸ್ವಿಯಾಗಿದೆ", refLabel:"ನಿಮ್ಮ ಉಲ್ಲೇಖ ಸಂಖ್ಯೆ",
+    receivedBanner:"ನಿಮ್ಮ ದಾಖಲೆಗಳು ಸ್ವೀಕೃತವಾಗಿವೆ ಮತ್ತು ಪರಿಶೀಲನೆಗೆ ಒಳಪಟ್ಟಿವೆ.",
+    successHelp:"ದಯವಿಟ್ಟು ಈ ಉಲ್ಲೇಖ ಸಂಖ್ಯೆಯನ್ನು ಉಳಿಸಿಕೊಳ್ಳಿ. ಲಭ್ಯವಿದ್ದರೆ ನಿಮ್ಮ WhatsApp ಸಂಖ್ಯೆಗೆ ದೃಢೀಕರಣ ಕಳುಹಿಸಲಾಗಿದೆ.",
+    uploadMore:"ಇನ್ನೊಂದು ದಾಖಲೆ ಅಪ್‌ಲೋಡ್ ಮಾಡಿ",
+    footNote:"ಈ ಪುಟವು ದಾಖಲೆಗಳನ್ನು ಸಂಗ್ರಹಿಸುತ್ತದೆ ಮಾತ್ರ; ಪರಿಶೀಲನೆ ಅಥವಾ ಅನುಮೋದನೆ ಮಾಡುವುದಿಲ್ಲ.",
+    footPrivacy:"ಗೌಪ್ಯತೆ ಸೂಚನೆ ಪ್ರಾರಂಭದಲ್ಲಿ · ಸಂಪರ್ಕ: support@example.in"
+  },
+  hi: {
+    appTitle:"सुरक्षित KYC अपलोड", stepDetails:"विवरण", stepDocs:"दस्तावेज़", stepReview:"पुष्टि", stepDone:"पूर्ण",
+    welcomeTitle:"अपने KYC दस्तावेज़ अपलोड करें",
+    welcomeHelp:"यह सुरक्षित पेज केवल आपके दस्तावेज़ एकत्र करता है। कुछ भी अपने-आप सत्यापित या स्वीकृत नहीं होता — हमारी टीम अलग से समीक्षा करती है। इसमें लगभग 2 मिनट लगते हैं।",
+    privacyTitle:"गोपनीयता सूचना",
+    privacy1:"आपके दस्तावेज़ केवल KYC आवश्यकता पूरी करने के लिए उपयोग होते हैं।",
+    privacy2:"अपलोड और स्टोरेज के दौरान एन्क्रिप्टेड रहते हैं; केवल अधिकृत स्टाफ देख सकता है।",
+    privacy3:"सार्वजनिक लिंक से साझा नहीं किए जाते; AI प्रशिक्षण में उपयोग नहीं होते।",
+    privacy4:"हमारी रिटेंशन नीति और भारतीय क़ानून (DPDP अधिनियम, 2023) के अनुसार ही रखे जाते हैं, फिर हटा दिए जाते हैं।",
+    startBtn:"शुरू करें",
+    detailsTitle:"आपका विवरण",
+    detailsHelp:"कृपया अपना मूल विवरण भरें ताकि हम दस्तावेज़ों को आपके आवेदन से जोड़ सकें।",
+    lblName:'पूरा नाम <span class="req">*</span>', lblMobile:'मोबाइल नंबर <span class="req">*</span>',
+    lblEmail:'ईमेल पता <span class="opt">(वैकल्पिक)</span>', lblCustId:'ग्राहक / आवेदन ID <span class="req">*</span>',
+    optional:"(वैकल्पिक)",
+    errName:"कृपया अपना पूरा नाम दर्ज करें।", errMobile:"कृपया सही 10 अंकों का मोबाइल नंबर दर्ज करें।",
+    errEmail:"कृपया सही ईमेल दर्ज करें।", errCustId:"कृपया अपना ग्राहक या आवेदन ID दर्ज करें।",
+    continueBtn:"आगे बढ़ें", backBtn:"वापस",
+    docTitle:"दस्तावेज़ अपलोड करें",
+    docHelp:"दस्तावेज़ का प्रकार चुनें, फिर साफ़ फोटो या PDF अपलोड करें।",
+    lblDocType:'दस्तावेज़ का प्रकार <span class="req">*</span>', docSelect:"-- दस्तावेज़ चुनें --",
+    errDocType:"कृपया दस्तावेज़ का प्रकार चुनें।", lblOther:'दस्तावेज़ का नाम <span class="req">*</span>',
+    lblFront:'सामने की ओर <span class="req">*</span>', lblBack:"पीछे की ओर",
+    tapUpload:"फोटो या PDF अपलोड करने के लिए दबाएँ", upHint:"JPG, PNG या PDF · अधिकतम 5 MB",
+    clearNotice:"📷 सुझाव: अच्छी रोशनी में समतल जगह पर दस्तावेज़ रखकर फोटो लें।",
+    errFiles:"कृपया आवश्यक दस्तावेज़ चित्र अपलोड करें।",
+    reviewTitle:"जाँचें और पुष्टि करें", reviewHelp:"सबमिट करने से पहले विवरण और फ़ाइलें जाँच लें।",
+    consentText:"मैं पुष्टि करता/करती हूँ कि ये दस्तावेज़ मेरे (या मेरे व्यवसाय के) हैं और केवल KYC उद्देश्य से इन्हें सुरक्षित रूप से एकत्र व संग्रहीत करने की सहमति देता/देती हूँ। मैं समझता/समझती हूँ कि मेरी फ़ाइलों की समीक्षा आंतरिक टीम अलग से करेगी।",
+    errConsent:"आगे बढ़ने के लिए कृपया सहमति बॉक्स पर टिक करें।",
+    submitBtn:"दस्तावेज़ सबमिट करें",
+    successTitle:"सबमिशन सफल रहा", refLabel:"आपका संदर्भ नंबर",
+    receivedBanner:"आपके दस्तावेज़ प्राप्त हो गए हैं और समीक्षा के अधीन हैं।",
+    successHelp:"कृपया यह संदर्भ नंबर सुरक्षित रखें। उपलब्ध होने पर आपके WhatsApp नंबर पर पुष्टि भेजी गई है।",
+    uploadMore:"एक और दस्तावेज़ अपलोड करें",
+    footNote:"यह पेज केवल दस्तावेज़ एकत्र करता है; सत्यापन या स्वीकृति नहीं करता।",
+    footPrivacy:"गोपनीयता सूचना शुरुआत में · संपर्क: support@example.in"
+  }
+};
+const EN_DEFAULTS = {};
+document.querySelectorAll("[data-i18n]").forEach(el => { EN_DEFAULTS[el.dataset.i18n] = el.innerHTML; });
+function setLang(lang) {
+  document.querySelectorAll("[data-i18n]").forEach(el => {
+    const k = el.dataset.i18n;
+    el.innerHTML = (lang !== "en" && I18N[lang][k]) ? I18N[lang][k] : EN_DEFAULTS[k];
+  });
+  document.documentElement.lang = lang;
+}
+document.getElementById("langSelect").addEventListener("change", e => setLang(e.target.value));
+
+/* ---------------- state & navigation ---------------- */
+const state = { files: { front: null, back: null } };
+const BACK_REQUIRED = ["aadhaar", "dl", "voter"];        // both sides needed
+const BACK_OPTIONAL = ["pan", "passport", "address", "other"]; // back allowed but optional
+const DOC_LABELS = { aadhaar:"Aadhaar Card", pan:"PAN Card", passport:"Passport", dl:"Driving Licence", voter:"Voter ID", address:"Address Proof", business:"Business Registration Document", other:"Other" };
+const PROGRESS = { 0:12, 1:25, 2:50, 3:75, 4:100 };
+
+function goTo(n) {
+  document.querySelectorAll(".step").forEach(s => s.classList.remove("visible"));
+  document.getElementById("step" + n).classList.add("visible");
+  document.getElementById("progressFill").style.width = PROGRESS[n] + "%";
+  document.querySelectorAll(".pstep").forEach(p => {
+    const s = +p.dataset.step;
+    p.classList.toggle("active", s === n);
+    p.classList.toggle("done", s < n);
+  });
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+function showErr(id, on) { document.getElementById("err-" + id).style.display = on ? "block" : "none"; }
+
+/* ---------------- step 1: details ---------------- */
+function validateDetails() {
+  let ok = true;
+  const name = document.getElementById("fullName").value.trim();
+  const mobile = document.getElementById("mobile").value.replace(/\D/g, "");
+  const email = document.getElementById("email").value.trim();
+  const cid = document.getElementById("custId").value.trim();
+  showErr("fullName", !name); if (!name) ok = false;
+  const mOk = /^[6-9]\d{9}$/.test(mobile);
+  showErr("mobile", !mOk); if (!mOk) ok = false;
+  const eOk = !email || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  showErr("email", !eOk); if (!eOk) ok = false;
+  showErr("custId", !cid); if (!cid) ok = false;
+  if (!ok) return;
+  Object.assign(state, { name, mobile, email, custId: cid });
+  goTo(2);
+}
+
+/* ---------------- step 2: documents ---------------- */
+function onDocTypeChange() {
+  const v = document.getElementById("docType").value;
+  showErr("docType", false);
+  document.getElementById("otherWrap").style.display = v === "other" ? "block" : "none";
+  document.getElementById("uploadArea").style.display = v ? "block" : "none";
+  const backWrap = document.getElementById("backWrap");
+  const needsBack = BACK_REQUIRED.includes(v), mayBack = BACK_OPTIONAL.includes(v);
+  backWrap.style.display = (needsBack || mayBack) ? "block" : "none";
+  document.getElementById("backReq").style.display = needsBack ? "inline" : "none";
+  document.getElementById("backOpt").style.display = mayBack && !needsBack ? "inline" : "none";
+}
+
+function pick(side) { document.getElementById("file-" + side).click(); }
+["front", "back"].forEach(side => {
+  document.getElementById("file-" + side).addEventListener("change", e => {
+    const f = e.target.files[0];
+    if (!f) return;
+    if (f.size > 5 * 1024 * 1024) { alert("File is larger than 5 MB. Please upload a smaller file."); e.target.value = ""; return; }
+    const reader = new FileReader();
+    reader.onload = () => {
+      state.files[side] = { name: f.name, type: f.type, size: f.size, dataUrl: reader.result };
+      renderPreview(side);
+      showErr("files", false);
+    };
+    reader.readAsDataURL(f);
+  });
+});
+function renderPreview(side) {
+  const box = document.getElementById("preview-" + side);
+  const zone = document.getElementById("zone-" + side);
+  const f = state.files[side];
+  if (!f) { box.innerHTML = ""; zone.classList.remove("has-file"); return; }
+  zone.classList.add("has-file");
+  const thumb = f.type === "application/pdf"
+    ? '<div class="pdf-badge">PDF</div>'
+    : '<img src="' + f.dataUrl + '" alt="preview">';
+  box.innerHTML = '<div class="file-preview">' + thumb +
+    '<div class="f-meta"><div class="f-name">' + esc(f.name) + '</div><div class="f-size">' + fmtSize(f.size) + '</div></div>' +
+    '<button class="file-remove" onclick="removeFile(\'' + side + '\')" aria-label="Remove">✕</button></div>';
+}
+function removeFile(side) { state.files[side] = null; document.getElementById("file-" + side).value = ""; renderPreview(side); }
+
+function validateDocs() {
+  const v = document.getElementById("docType").value;
+  if (!v) { showErr("docType", true); return; }
+  if (v === "other" && !document.getElementById("otherName").value.trim()) {
+    document.getElementById("otherName").classList.add("invalid"); return;
+  }
+  const needBack = BACK_REQUIRED.includes(v);
+  if (!state.files.front || (needBack && !state.files.back)) { showErr("files", true); return; }
+  state.docType = v;
+  state.docLabel = v === "other" ? document.getElementById("otherName").value.trim() : DOC_LABELS[v];
+  renderReview();
+  goTo(3);
+}
+
+/* ---------------- step 3: review ---------------- */
+function maskMobile(m) { return m.slice(0, 2) + "XXXXX" + m.slice(7); }
+function renderReview() {
+  const rows = [
+    ["Name", state.name],
+    ["Mobile", maskMobile(state.mobile)],
+    ["Email", state.email || "—"],
+    ["Customer / Application ID", state.custId],
+    ["Document", state.docLabel]
+  ];
+  document.getElementById("reviewDetails").innerHTML = rows.map(r =>
+    '<div class="review-row"><span class="rk">' + r[0] + '</span><span class="rv">' + esc(r[1]) + '</span></div>').join("");
+  let thumbs = "";
+  [["front", "Front"], ["back", "Back"]].forEach(([side, lbl]) => {
+    const f = state.files[side];
+    if (!f) return;
+    thumbs += '<div class="thumb">' + (f.type === "application/pdf"
+      ? '<div class="pdf-thumb">PDF</div>' : '<img src="' + f.dataUrl + '" alt="' + lbl + '">') + lbl + '</div>';
+  });
+  document.getElementById("reviewThumbs").innerHTML = thumbs;
+}
+
+/* ---------------- submit ---------------- */
+const STORE_KEY = "kycSubmissions";
+function submitAll() {
+  if (!document.getElementById("consent").checked) { showErr("consent", true); return; }
+  showErr("consent", false);
+  const btn = document.getElementById("submitBtn");
+  btn.disabled = true;
+
+  const now = new Date();
+  const ref = "KYC-" + now.getFullYear() + String(now.getMonth() + 1).padStart(2, "0") + String(now.getDate()).padStart(2, "0") +
+    "-" + Math.floor(1000 + Math.random() * 9000);
+
+  const submission = {
+    ref, name: state.name, mobile: state.mobile, email: state.email || "",
+    custId: state.custId, docType: state.docType, docLabel: state.docLabel,
+    files: [
+      { side: "front", name: state.files.front.name, type: state.files.front.type, size: state.files.front.size, dataUrl: state.files.front.dataUrl },
+      ...(state.files.back ? [{ side: "back", name: state.files.back.name, type: state.files.back.type, size: state.files.back.size, dataUrl: state.files.back.dataUrl }] : [])
+    ],
+    consent: { given: true, at: now.toISOString(), text: "KYC collection & secure storage consent v1" },
+    status: "Documents Received",
+    notes: [],
+    activity: [{ at: now.toISOString(), by: "customer", action: "Documents submitted with consent" }],
+    createdAt: now.toISOString()
+  };
+  try {
+    const all = JSON.parse(localStorage.getItem(STORE_KEY) || "[]");
+    all.unshift(submission);
+    localStorage.setItem(STORE_KEY, JSON.stringify(all));
+  } catch (e) {
+    // Storage may overflow with large files in this prototype; keep record without file data.
+    submission.files.forEach(f => delete f.dataUrl);
+    const all = JSON.parse(localStorage.getItem(STORE_KEY) || "[]");
+    all.unshift(submission);
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(all)); } catch (_) {}
+  }
+  document.getElementById("refNum").textContent = ref;
+  // In production a WhatsApp confirmation is sent server-side via the Business API here.
+  btn.disabled = false;
+  goTo(4);
+}
+
+function resetFlow() {
+  state.files = { front: null, back: null };
+  ["front", "back"].forEach(s => { document.getElementById("file-" + s).value = ""; renderPreview(s); });
+  document.getElementById("docType").value = "";
+  document.getElementById("consent").checked = false;
+  onDocTypeChange();
+  goTo(2);
+}
+
+/* ---------------- utils ---------------- */
+function esc(s) { const d = document.createElement("div"); d.textContent = s; return d.innerHTML; }
+function fmtSize(b) { return b > 1048576 ? (b / 1048576).toFixed(1) + " MB" : Math.round(b / 1024) + " KB"; }
+
+// Pre-fill from a tokenised link, e.g. ?cid=APP-2026-1042&name=Ramesh
+const qs = new URLSearchParams(location.search);
+if (qs.get("cid")) document.getElementById("custId").value = qs.get("cid");
+if (qs.get("name")) document.getElementById("fullName").value = qs.get("name");
+</script>
+</body>
+</html>

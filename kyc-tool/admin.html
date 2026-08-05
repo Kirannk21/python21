@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>KYC Admin Dashboard</title>
+<style>
+  :root {
+    --brand: #0b5394; --brand-dark: #073763; --brand-light: #e8f0fa;
+    --accent: #1a9e5c; --danger: #c0392b; --warn: #b7791f;
+    --text: #1f2a37; --muted: #6b7280; --bg: #f4f6f9; --card: #fff; --radius: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.5; }
+
+  header { background: var(--brand); color: #fff; padding: 12px 16px; display: flex; align-items: center; gap: 12px; position: sticky; top: 0; z-index: 20; }
+  .logo { width: 36px; height: 36px; border-radius: 9px; background: #fff; color: var(--brand); display: flex; align-items: center; justify-content: center; font-weight: 800; }
+  .h-title { font-weight: 700; }
+  .h-user { margin-left: auto; font-size: 13px; opacity: .9; display: flex; align-items: center; gap: 10px; }
+  .h-user button { background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.4); color: #fff; border-radius: 8px; padding: 6px 10px; cursor: pointer; font-size: 13px; }
+
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 16px; }
+  .card { background: var(--card); border-radius: var(--radius); padding: 18px 16px; box-shadow: 0 1px 4px rgba(16,24,40,.08); margin-bottom: 16px; }
+  h2 { font-size: 18px; color: var(--brand-dark); margin-bottom: 10px; }
+  h3 { font-size: 15px; color: var(--brand-dark); margin: 14px 0 8px; }
+
+  /* Login */
+  .login-box { max-width: 380px; margin: 8vh auto; }
+  label { display: block; font-size: 13.5px; font-weight: 600; margin: 12px 0 5px; }
+  input[type=text], input[type=password], input[type=search], select, textarea {
+    width: 100%; padding: 11px 12px; font-size: 15px; border: 1.5px solid #cbd5e1; border-radius: 9px; color: var(--text);
+  }
+  input:focus, select:focus, textarea:focus { outline: 2px solid var(--brand); border-color: var(--brand); }
+  .btn { display: inline-block; padding: 11px 18px; font-size: 15px; font-weight: 700; border: none; border-radius: 10px; cursor: pointer; }
+  .btn-primary { background: var(--brand); color: #fff; }
+  .btn-primary:active { background: var(--brand-dark); }
+  .btn-outline { background: #fff; color: var(--brand); border: 1.5px solid var(--brand); }
+  .btn-danger { background: #fff; color: var(--danger); border: 1.5px solid var(--danger); }
+  .btn-sm { padding: 7px 12px; font-size: 13px; border-radius: 8px; }
+  .btn-block { width: 100%; margin-top: 16px; }
+  .login-err { color: var(--danger); font-size: 13.5px; margin-top: 10px; display: none; }
+  .login-hint { font-size: 12.5px; color: var(--muted); margin-top: 14px; background: var(--brand-light); border-radius: 8px; padding: 10px; }
+
+  /* Toolbar */
+  .toolbar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .toolbar input[type=search] { flex: 1; min-width: 220px; }
+  .toolbar select { width: auto; }
+
+  /* Stats */
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 16px; }
+  .stat { background: var(--card); border-radius: var(--radius); padding: 12px 14px; box-shadow: 0 1px 4px rgba(16,24,40,.08); }
+  .stat .n { font-size: 22px; font-weight: 800; color: var(--brand-dark); }
+  .stat .l { font-size: 12px; color: var(--muted); }
+
+  /* Table */
+  .table-scroll { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; min-width: 760px; }
+  th { text-align: left; padding: 9px 10px; background: var(--brand-light); color: var(--brand-dark); font-size: 12px; text-transform: uppercase; letter-spacing: .4px; white-space: nowrap; }
+  td { padding: 10px; border-bottom: 1px solid #eef2f6; vertical-align: middle; }
+  tr.row-click { cursor: pointer; }
+  tr.row-click:hover { background: #f8fafc; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 700; white-space: nowrap; }
+  .st-received { background: #e8f0fa; color: #0b5394; }
+  .st-review { background: #fff4d6; color: #8a6100; }
+  .st-additional { background: #fdebd8; color: #ad5700; }
+  .st-accepted { background: #e3f7ec; color: #157347; }
+  .st-rejected { background: #fdecea; color: #b02a1e; }
+  .empty { text-align: center; color: var(--muted); padding: 30px 0; }
+
+  /* Detail modal */
+  .modal-bg { position: fixed; inset: 0; background: rgba(15,23,42,.55); display: none; z-index: 40; overflow-y: auto; padding: 20px 12px; }
+  .modal-bg.open { display: block; }
+  .modal { max-width: 760px; margin: 0 auto; background: #fff; border-radius: 14px; padding: 20px 18px; position: relative; }
+  .modal-close { position: absolute; top: 10px; right: 12px; background: none; border: none; font-size: 26px; cursor: pointer; color: var(--muted); }
+  .kv { display: grid; grid-template-columns: 170px 1fr; gap: 4px 12px; font-size: 14px; margin-top: 8px; }
+  .kv .k { color: var(--muted); }
+  .kv .v { font-weight: 600; word-break: break-word; }
+  .docs-grid { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 8px; }
+  .doc-card { border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px; width: 160px; text-align: center; }
+  .doc-card img { width: 100%; height: 110px; object-fit: cover; border-radius: 8px; }
+  .doc-card .pdf-thumb { width: 100%; height: 110px; border-radius: 8px; background: #fdecea; color: var(--danger); display: flex; align-items: center; justify-content: center; font-weight: 800; }
+  .doc-card .d-side { font-size: 12px; font-weight: 700; margin-top: 6px; }
+  .doc-card .d-name { font-size: 11px; color: var(--muted); word-break: break-all; }
+  .doc-actions { display: flex; gap: 6px; justify-content: center; margin-top: 8px; }
+  .note { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 10px; font-size: 13.5px; margin-top: 8px; }
+  .note .n-meta { font-size: 11.5px; color: var(--muted); margin-top: 3px; }
+  .activity { font-size: 13px; margin-top: 6px; max-height: 180px; overflow-y: auto; }
+  .activity li { margin-left: 18px; margin-bottom: 5px; }
+  .activity .a-time { color: var(--muted); font-size: 12px; }
+  .status-row, .wa-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 6px; }
+  textarea { min-height: 70px; resize: vertical; font-family: inherit; }
+  .wa-preview { background: #e7f8ee; border: 1px solid #b7e4c7; border-radius: 10px; padding: 10px 12px; font-size: 13.5px; white-space: pre-wrap; margin-top: 8px; }
+  .consent-ok { color: var(--accent); font-weight: 700; }
+  .section-div { border: none; border-top: 1px solid #eef2f6; margin: 16px 0; }
+  .flash { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); background: #111827; color: #fff; padding: 10px 18px; border-radius: 10px; font-size: 14px; display: none; z-index: 60; }
+  .demo-tag { position: fixed; bottom: 8px; right: 8px; background: #111827; color: #fff; font-size: 10px; padding: 3px 8px; border-radius: 6px; opacity: .65; z-index: 50; }
+  .doc-viewer { position: fixed; inset: 0; background: rgba(15,23,42,.85); z-index: 70; display: none; align-items: center; justify-content: center; padding: 20px; }
+  .doc-viewer.open { display: flex; }
+  .doc-viewer img, .doc-viewer iframe { max-width: 95vw; max-height: 88vh; border-radius: 10px; background: #fff; }
+  .doc-viewer iframe { width: 90vw; height: 85vh; border: none; }
+  .doc-viewer .dv-close { position: absolute; top: 14px; right: 18px; font-size: 30px; color: #fff; background: none; border: none; cursor: pointer; }
+  @media (max-width: 600px) { .kv { grid-template-columns: 1fr; } .kv .k { margin-top: 6px; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">SB</div>
+  <div>
+    <div class="h-title">KYC Admin Dashboard</div>
+    <div style="font-size:12px;opacity:.85">Sampada Business Services (Demo)</div>
+  </div>
+  <div class="h-user" id="userBox" style="display:none">
+    <span id="userName"></span>
+    <button onclick="logout()">Log out</button>
+  </div>
+</header>
+
+<!-- LOGIN -->
+<div class="wrap" id="loginView">
+  <div class="card login-box">
+    <h2>Staff login</h2>
+    <p style="font-size:13.5px;color:var(--muted)">Access is restricted to authorised staff. All activity is logged.</p>
+    <label>Username</label>
+    <input type="text" id="loginUser" autocomplete="username">
+    <label>Password</label>
+    <input type="password" id="loginPass" autocomplete="current-password">
+    <div class="login-err" id="loginErr">Incorrect username or password.</div>
+    <button class="btn btn-primary btn-block" onclick="login()">Log in</button>
+    <div class="login-hint"><strong>Prototype credentials:</strong> username <code>admin</code>, password <code>kyc@demo</code>. In production this is replaced by SSO / 2-factor authentication.</div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="wrap" id="dashView" style="display:none">
+  <div class="stats" id="statsRow"></div>
+
+  <div class="card">
+    <div class="toolbar">
+      <input type="search" id="searchBox" placeholder="Search name, mobile, customer ID or reference number…" oninput="renderTable()">
+      <select id="statusFilter" onchange="renderTable()">
+        <option value="">All statuses</option>
+        <option>Documents Received</option>
+        <option>Under Review</option>
+        <option>Additional Document Required</option>
+        <option>Accepted</option>
+        <option>Rejected</option>
+      </select>
+      <button class="btn btn-outline btn-sm" onclick="exportCSV()">⬇ Export CSV</button>
+      <button class="btn btn-outline btn-sm" onclick="copyUploadLink()">🔗 Copy upload link</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="table-scroll">
+      <table>
+        <thead><tr>
+          <th>Reference</th><th>Name</th><th>Mobile</th><th>Customer ID</th><th>Document</th><th>Status</th><th>Submitted</th>
+        </tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <div class="empty" id="emptyMsg" style="display:none">No submissions match your search.</div>
+  </div>
+</div>
+
+<!-- DETAIL MODAL -->
+<div class="modal-bg" id="modalBg" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <h2 id="mRef"></h2>
+    <span class="badge" id="mBadge"></span>
+
+    <div class="kv" id="mDetails"></div>
+
+    <hr class="section-div">
+    <h3>Documents</h3>
+    <div class="docs-grid" id="mDocs"></div>
+
+    <hr class="section-div">
+    <h3>Change status</h3>
+    <div class="status-row">
+      <select id="mStatus">
+        <option>Documents Received</option>
+        <option>Under Review</option>
+        <option>Additional Document Required</option>
+        <option>Accepted</option>
+        <option>Rejected</option>
+      </select>
+      <button class="btn btn-primary btn-sm" onclick="saveStatus()">Update status</button>
+    </div>
+
+    <hr class="section-div">
+    <h3>Internal notes</h3>
+    <div id="mNotes"></div>
+    <textarea id="noteInput" placeholder="Add an internal note (not visible to the customer)…"></textarea>
+    <button class="btn btn-outline btn-sm" style="margin-top:8px" onclick="addNote()">Add note</button>
+
+    <hr class="section-div">
+    <h3>WhatsApp message</h3>
+    <div class="wa-row">
+      <select id="waTemplate" onchange="renderWaPreview()">
+        <option value="missing">Request missing document</option>
+        <option value="clearer">Request clearer copy</option>
+        <option value="link">Send upload link again</option>
+        <option value="received">Confirm documents received</option>
+      </select>
+      <button class="btn btn-primary btn-sm" onclick="sendWa()">Open in WhatsApp</button>
+    </div>
+    <div class="wa-preview" id="waPreview"></div>
+
+    <hr class="section-div">
+    <h3>Activity log</h3>
+    <ul class="activity" id="mActivity"></ul>
+
+    <hr class="section-div">
+    <h3>Retention</h3>
+    <p style="font-size:13px;color:var(--muted)">Company policy: KYC documents are deleted 5 years after account closure, or earlier on a valid erasure request (DPDP Act, 2023). Deletion is permanent and is recorded in the audit log.</p>
+    <button class="btn btn-danger btn-sm" style="margin-top:8px" onclick="deleteSubmission()">🗑 Delete submission per retention policy</button>
+  </div>
+</div>
+
+<div class="doc-viewer" id="docViewer" onclick="if(event.target===this)closeViewer()">
+  <button class="dv-close" onclick="closeViewer()">✕</button>
+  <div id="docViewerBody"></div>
+</div>
+
+<div class="flash" id="flash"></div>
+<div class="demo-tag">PROTOTYPE · SAMPLE DATA ONLY</div>
+
+<script>
+const STORE_KEY = "kycSubmissions";
+const SESSION_KEY = "kycAdminSession";
+const STATUS_CLASS = {
+  "Documents Received": "st-received", "Under Review": "st-review",
+  "Additional Document Required": "st-additional", "Accepted": "st-accepted", "Rejected": "st-rejected"
+};
+let currentRef = null;
+
+/* ---------- tiny sample images (SVG data URIs) ---------- */
+function sampleImg(label, color) {
+  const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="320" height="200">' +
+    '<rect width="320" height="200" rx="12" fill="' + color + '"/>' +
+    '<rect x="18" y="18" width="70" height="84" rx="6" fill="#ffffff" opacity="0.85"/>' +
+    '<rect x="104" y="26" width="180" height="12" rx="4" fill="#ffffff" opacity="0.9"/>' +
+    '<rect x="104" y="48" width="140" height="10" rx="4" fill="#ffffff" opacity="0.7"/>' +
+    '<rect x="104" y="68" width="160" height="10" rx="4" fill="#ffffff" opacity="0.7"/>' +
+    '<rect x="18" y="120" width="284" height="10" rx="4" fill="#ffffff" opacity="0.6"/>' +
+    '<rect x="18" y="140" width="230" height="10" rx="4" fill="#ffffff" opacity="0.6"/>' +
+    '<text x="160" y="182" text-anchor="middle" font-family="Arial" font-size="15" font-weight="bold" fill="#ffffff">' + label + ' - SAMPLE</text></svg>';
+  return "data:image/svg+xml," + encodeURIComponent(svg);
+}
+
+/* ---------- seed sample data ---------- */
+function seed() {
+  if (localStorage.getItem("kycSeededV1")) return;
+  localStorage.setItem("kycSeededV1", "1");
+  const day = 86400000, now = Date.now();
+  const mk = (ref, name, mobile, email, cid, dt, dl, sides, status, offset, notes, extraAct) => ({
+    ref, name, mobile, email, custId: cid, docType: dt, docLabel: dl,
+    files: sides.map(s => ({ side: s, name: dl.toLowerCase().replace(/ /g, "-") + "-" + s + ".jpg", type: "image/svg+xml", size: 182000, dataUrl: sampleImg(dl, s === "front" ? "#0b5394" : "#1a9e5c") })),
+    consent: { given: true, at: new Date(now - offset).toISOString(), text: "KYC collection & secure storage consent v1" },
+    status, notes: notes || [],
+    activity: [{ at: new Date(now - offset).toISOString(), by: "customer", action: "Documents submitted with consent" }, ...(extraAct || [])],
+    createdAt: new Date(now - offset).toISOString()
+  });
+  const data = [
+    mk("KYC-20260803-4821", "Ramesh Kumar", "9845012345", "ramesh.k@example.com", "APP-2026-1042", "aadhaar", "Aadhaar Card", ["front", "back"], "Under Review", 2 * day,
+      [{ at: new Date(now - day).toISOString(), by: "admin", text: "Both sides clear. Address matches application." }],
+      [{ at: new Date(now - day).toISOString(), by: "admin", action: 'Status changed to "Under Review"' }]),
+    mk("KYC-20260802-1937", "Priya Shetty", "9900112233", "", "APP-2026-1055", "pan", "PAN Card", ["front"], "Additional Document Required", 3 * day,
+      [{ at: new Date(now - 2 * day).toISOString(), by: "admin", text: "PAN image blurred at corners. Asked for a clearer copy via WhatsApp." }],
+      [{ at: new Date(now - 2 * day).toISOString(), by: "admin", action: 'Status changed to "Additional Document Required"' },
+       { at: new Date(now - 2 * day).toISOString(), by: "admin", action: "WhatsApp sent: request clearer copy" }]),
+    mk("KYC-20260730-7754", "Abdul Rahman", "9731245678", "abdul.r@example.com", "CUST-88231", "dl", "Driving Licence", ["front", "back"], "Accepted", 6 * day, [],
+      [{ at: new Date(now - 4 * day).toISOString(), by: "admin", action: 'Status changed to "Accepted"' }]),
+    mk("KYC-20260728-3310", "Lakshmi Traders", "9812345670", "accounts@lakshmitraders.example", "BIZ-2026-009", "business", "Business Registration Document", ["front"], "Documents Received", 8 * day),
+    mk("KYC-20260725-9086", "Suresh Gowda", "9448076543", "", "APP-2026-0991", "voter", "Voter ID", ["front", "back"], "Rejected", 11 * day,
+      [{ at: new Date(now - 9 * day).toISOString(), by: "admin", text: "Name on document does not match application. Customer informed." }],
+      [{ at: new Date(now - 9 * day).toISOString(), by: "admin", action: 'Status changed to "Rejected"' }])
+  ];
+  const existing = JSON.parse(localStorage.getItem(STORE_KEY) || "[]");
+  localStorage.setItem(STORE_KEY, JSON.stringify(existing.concat(data)));
+}
+function getAll() { return JSON.parse(localStorage.getItem(STORE_KEY) || "[]"); }
+function saveAll(a) { localStorage.setItem(STORE_KEY, JSON.stringify(a)); }
+
+/* ---------- auth (prototype only) ---------- */
+function login() {
+  const u = document.getElementById("loginUser").value.trim();
+  const p = document.getElementById("loginPass").value;
+  if (u === "admin" && p === "kyc@demo") {
+    sessionStorage.setItem(SESSION_KEY, JSON.stringify({ user: u, at: new Date().toISOString() }));
+    showDash();
+  } else {
+    document.getElementById("loginErr").style.display = "block";
+  }
+}
+function logout() { sessionStorage.removeItem(SESSION_KEY); location.reload(); }
+function sessionUser() {
+  try { return JSON.parse(sessionStorage.getItem(SESSION_KEY) || "null"); } catch (e) { return null; }
+}
+
+/* ---------- dashboard ---------- */
+function showDash() {
+  document.getElementById("loginView").style.display = "none";
+  document.getElementById("dashView").style.display = "block";
+  document.getElementById("userBox").style.display = "flex";
+  document.getElementById("userName").textContent = "👤 " + sessionUser().user;
+  renderStats(); renderTable();
+}
+function maskMobile(m) { return m ? m.slice(0, 2) + "XXXXX" + m.slice(7) : "—"; }
+function fmtDate(iso) {
+  const d = new Date(iso);
+  return d.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) + " " +
+         d.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
+}
+function renderStats() {
+  const all = getAll();
+  const by = s => all.filter(x => x.status === s).length;
+  const cells = [
+    ["Total", all.length], ["Received", by("Documents Received")], ["Under review", by("Under Review")],
+    ["Needs more", by("Additional Document Required")], ["Accepted", by("Accepted")], ["Rejected", by("Rejected")]
+  ];
+  document.getElementById("statsRow").innerHTML = cells.map(c =>
+    '<div class="stat"><div class="n">' + c[1] + '</div><div class="l">' + c[0] + '</div></div>').join("");
+}
+function renderTable() {
+  const q = document.getElementById("searchBox").value.trim().toLowerCase();
+  const sf = document.getElementById("statusFilter").value;
+  const rows = getAll().filter(s => {
+    if (sf && s.status !== sf) return false;
+    if (!q) return true;
+    return [s.name, s.mobile, s.custId, s.ref].some(v => (v || "").toLowerCase().includes(q));
+  });
+  const tb = document.getElementById("tbody");
+  tb.innerHTML = rows.map(s =>
+    '<tr class="row-click" onclick="openModal(\'' + s.ref + '\')">' +
+    '<td><strong>' + s.ref + '</strong></td>' +
+    '<td>' + esc(s.name) + '</td>' +
+    '<td>' + maskMobile(s.mobile) + '</td>' +
+    '<td>' + esc(s.custId) + '</td>' +
+    '<td>' + esc(s.docLabel) + '</td>' +
+    '<td><span class="badge ' + STATUS_CLASS[s.status] + '">' + s.status + '</span></td>' +
+    '<td>' + fmtDate(s.createdAt) + '</td></tr>').join("");
+  document.getElementById("emptyMsg").style.display = rows.length ? "none" : "block";
+}
+
+/* ---------- detail modal ---------- */
+function findSub(ref) { return getAll().find(s => s.ref === ref); }
+function openModal(ref) {
+  currentRef = ref;
+  const s = findSub(ref);
+  if (!s) return;
+  document.getElementById("mRef").textContent = s.ref;
+  const badge = document.getElementById("mBadge");
+  badge.className = "badge " + STATUS_CLASS[s.status]; badge.textContent = s.status;
+  document.getElementById("mDetails").innerHTML =
+    kv("Name", esc(s.name)) + kv("Mobile", maskMobile(s.mobile) + ' <button class="btn btn-outline btn-sm" style="margin-left:6px" onclick="revealMobile(this,\'' + s.ref + '\')">Reveal</button>') +
+    kv("Email", esc(s.email) || "—") + kv("Customer / App ID", esc(s.custId)) +
+    kv("Document", esc(s.docLabel)) + kv("Submitted", fmtDate(s.createdAt)) +
+    kv("Consent", '<span class="consent-ok">✔ Recorded</span> ' + fmtDate(s.consent.at));
+  document.getElementById("mDocs").innerHTML = s.files.map((f, i) => {
+    const thumb = f.type === "application/pdf"
+      ? '<div class="pdf-thumb">PDF</div>'
+      : (f.dataUrl ? '<img src="' + f.dataUrl + '" alt="">' : '<div class="pdf-thumb">FILE</div>');
+    return '<div class="doc-card">' + thumb +
+      '<div class="d-side">' + (f.side === "front" ? "Front side" : "Back side") + '</div>' +
+      '<div class="d-name">' + esc(f.name) + '</div>' +
+      '<div class="doc-actions">' +
+      '<button class="btn btn-outline btn-sm" onclick="viewDoc(\'' + s.ref + '\',' + i + ')">View</button>' +
+      '<button class="btn btn-outline btn-sm" onclick="downloadDoc(\'' + s.ref + '\',' + i + ')">Download</button></div></div>';
+  }).join("");
+  document.getElementById("mStatus").value = s.status;
+  renderNotes(s); renderActivity(s); renderWaPreview();
+  document.getElementById("modalBg").classList.add("open");
+}
+function kv(k, v) { return '<div class="k">' + k + '</div><div class="v">' + v + '</div>'; }
+function closeModal() { document.getElementById("modalBg").classList.remove("open"); currentRef = null; }
+
+function revealMobile(btn, ref) {
+  const s = findSub(ref);
+  btn.parentElement.innerHTML = esc(s.mobile) + ' <span style="font-size:11px;color:var(--muted)">(access logged)</span>';
+  logActivity(ref, "Full mobile number viewed");
+  renderActivity(findSub(ref));
+}
+
+/* ---------- documents ---------- */
+function viewDoc(ref, i) {
+  const f = findSub(ref).files[i];
+  if (!f.dataUrl) { flash("File data not stored in this prototype record."); return; }
+  const body = document.getElementById("docViewerBody");
+  body.innerHTML = f.type === "application/pdf"
+    ? '<iframe src="' + f.dataUrl + '"></iframe>'
+    : '<img src="' + f.dataUrl + '" alt="document">';
+  document.getElementById("docViewer").classList.add("open");
+  logActivity(ref, "Document viewed: " + f.side + " (" + f.name + ")");
+  renderActivity(findSub(ref));
+}
+function closeViewer() { document.getElementById("docViewer").classList.remove("open"); document.getElementById("docViewerBody").innerHTML = ""; }
+function downloadDoc(ref, i) {
+  const f = findSub(ref).files[i];
+  if (!f.dataUrl) { flash("File data not stored in this prototype record."); return; }
+  const a = document.createElement("a");
+  a.href = f.dataUrl; a.download = ref + "-" + f.side + "-" + f.name;
+  document.body.appendChild(a); a.click(); a.remove();
+  logActivity(ref, "Document downloaded: " + f.side + " (" + f.name + ")");
+  renderActivity(findSub(ref));
+}
+
+/* ---------- status / notes / activity ---------- */
+function logActivity(ref, action) {
+  const all = getAll(); const s = all.find(x => x.ref === ref);
+  if (!s) return;
+  s.activity.unshift({ at: new Date().toISOString(), by: sessionUser().user, action });
+  saveAll(all);
+}
+function saveStatus() {
+  const ns = document.getElementById("mStatus").value;
+  const all = getAll(); const s = all.find(x => x.ref === currentRef);
+  if (s.status !== ns) {
+    s.status = ns;
+    s.activity.unshift({ at: new Date().toISOString(), by: sessionUser().user, action: 'Status changed to "' + ns + '"' });
+    saveAll(all);
+    const badge = document.getElementById("mBadge");
+    badge.className = "badge " + STATUS_CLASS[ns]; badge.textContent = ns;
+    renderStats(); renderTable(); renderActivity(s);
+    flash("Status updated to: " + ns);
+  }
+}
+function renderNotes(s) {
+  document.getElementById("mNotes").innerHTML = s.notes.length
+    ? s.notes.map(n => '<div class="note">' + esc(n.text) + '<div class="n-meta">' + esc(n.by) + ' · ' + fmtDate(n.at) + '</div></div>').join("")
+    : '<p style="font-size:13px;color:var(--muted)">No notes yet.</p>';
+}
+function addNote() {
+  const t = document.getElementById("noteInput").value.trim();
+  if (!t) return;
+  const all = getAll(); const s = all.find(x => x.ref === currentRef);
+  s.notes.unshift({ at: new Date().toISOString(), by: sessionUser().user, text: t });
+  s.activity.unshift({ at: new Date().toISOString(), by: sessionUser().user, action: "Internal note added" });
+  saveAll(all);
+  document.getElementById("noteInput").value = "";
+  renderNotes(s); renderActivity(s);
+}
+function renderActivity(s) {
+  document.getElementById("mActivity").innerHTML = s.activity.map(a =>
+    '<li>' + esc(a.action) + ' — <strong>' + esc(a.by) + '</strong><br><span class="a-time">' + fmtDate(a.at) + '</span></li>').join("");
+}
+
+/* ---------- WhatsApp ---------- */
+function uploadLink(s) {
+  return location.origin + location.pathname.replace(/admin\.html$/, "index.html") + (s ? "?cid=" + encodeURIComponent(s.custId) : "");
+}
+function waMessage(s) {
+  const tpl = document.getElementById("waTemplate").value;
+  const link = uploadLink(s);
+  if (tpl === "link")
+    return "Hello " + s.name + ", please use the secure link below to upload your KYC documents. This link is intended only for document collection. Your documents will be reviewed separately after submission.\n\nSecure upload link: " + link + "\n\nPlease do not send your KYC documents directly in the WhatsApp chat.";
+  if (tpl === "missing")
+    return "Hello " + s.name + ", thank you for your KYC submission (Ref: " + s.ref + "). We need one more document to continue. Please upload it using the secure link below.\n\nSecure upload link: " + link + "\n\nPlease do not send your KYC documents directly in the WhatsApp chat.";
+  if (tpl === "clearer")
+    return "Hello " + s.name + ", thank you for your KYC submission (Ref: " + s.ref + "). The copy of your " + s.docLabel + " is not clear enough to read. Please upload a clearer photo or PDF using the secure link below.\n\nSecure upload link: " + link + "\n\nPlease do not send your KYC documents directly in the WhatsApp chat.";
+  return "Hello " + s.name + ", your KYC documents have been received and are subject to review. Your reference number is " + s.ref + ". We will contact you if anything more is needed.";
+}
+function renderWaPreview() {
+  const s = findSub(currentRef);
+  if (s) document.getElementById("waPreview").textContent = waMessage(s);
+}
+function sendWa() {
+  const s = findSub(currentRef);
+  const url = "https://wa.me/91" + s.mobile + "?text=" + encodeURIComponent(waMessage(s));
+  window.open(url, "_blank");
+  const tplLabel = document.getElementById("waTemplate").selectedOptions[0].textContent;
+  logActivity(s.ref, "WhatsApp sent: " + tplLabel.toLowerCase());
+  renderActivity(findSub(s.ref));
+}
+function copyUploadLink() {
+  const link = uploadLink(null);
+  navigator.clipboard.writeText(link).then(() => flash("Upload link copied: " + link), () => flash(link));
+}
+
+/* ---------- retention delete ---------- */
+function deleteSubmission() {
+  const s = findSub(currentRef);
+  if (!confirm("Permanently delete submission " + s.ref + " and all its documents?\n\nThis action is recorded and cannot be undone.")) return;
+  saveAll(getAll().filter(x => x.ref !== currentRef));
+  closeModal(); renderStats(); renderTable();
+  flash("Submission " + s.ref + " deleted per retention policy.");
+}
+
+/* ---------- export ---------- */
+function exportCSV() {
+  const rows = [["Reference", "Name", "Mobile (masked)", "Email", "Customer ID", "Document", "Sides", "Status", "Consent recorded", "Submitted", "Last activity"]];
+  getAll().forEach(s => rows.push([
+    s.ref, s.name, maskMobile(s.mobile), s.email || "", s.custId, s.docLabel,
+    s.files.map(f => f.side).join("+"), s.status, s.consent && s.consent.given ? "Yes (" + s.consent.at + ")" : "No",
+    s.createdAt, s.activity[0] ? s.activity[0].action + " @ " + s.activity[0].at : ""
+  ]));
+  const csv = rows.map(r => r.map(c => '"' + String(c).replace(/"/g, '""') + '"').join(",")).join("\r\n");
+  const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "kyc-submissions-" + new Date().toISOString().slice(0, 10) + ".csv";
+  document.body.appendChild(a); a.click(); a.remove();
+  flash("Report exported (" + (rows.length - 1) + " submissions). ID numbers are masked in exports.");
+}
+
+/* ---------- utils ---------- */
+function esc(s) { const d = document.createElement("div"); d.textContent = s == null ? "" : s; return d.innerHTML; }
+let flashTimer = null;
+function flash(msg) {
+  const f = document.getElementById("flash");
+  f.textContent = msg; f.style.display = "block";
+  clearTimeout(flashTimer);
+  flashTimer = setTimeout(() => f.style.display = "none", 3500);
+}
+document.getElementById("loginPass").addEventListener("keydown", e => { if (e.key === "Enter") login(); });
+
+/* ---------- boot ---------- */
+seed();
+if (sessionUser()) showDash();
+</script>
+</body>
+</html>
